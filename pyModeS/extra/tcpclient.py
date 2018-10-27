@@ -20,8 +20,8 @@ class BaseClient(Thread):
         self.port = port
         self.buffer = []
         self.rawtype = rawtype
-        if self.rawtype not in ['avr', 'beast']:
-            print("rawtype must be either avr or beast")
+        if self.rawtype not in ['avr', 'beast', 'dump1090']:
+            print("rawtype must be either avr, beast or dump1090")
             os._exit(1)
 
     def connect(self):
@@ -37,6 +37,36 @@ class BaseClient(Thread):
                 print("Socket connection error: %s. reconnecting..." % err)
                 time.sleep(3)
 
+    def read_dump1090_buffer(self):
+        #Read dump1090 RAW output
+
+        messages = []
+        complete = False
+        ts = time.time()
+
+        #buffer is a series of char values - the 'string' given by socket
+        #Convert into a list of one char strings
+        #Join all chars into temporary string
+        tempbuf = "".join(map(chr,self.buffer))
+
+        #set flag if last character is not newline
+        complete = True if tempbuf[-1] == '\n' else False
+        #split them by newline
+        messages = tempbuf.split('\n')
+                
+        #place residual back in buffer
+        if not complete:
+            self.buffer = list(messages[-1])
+        else:
+            self.buffer = []
+
+        #we're either deleting a partial message, or an empty string resulting from splitting newline
+        del(messages[-1])
+            
+        #process messages into messages list
+        messages = [[message[13:-1], ts] for message in messages]
+        
+        return messages
 
     def read_avr_buffer(self):
         # -- testing --
@@ -172,7 +202,9 @@ class BaseClient(Thread):
                     messages = self.read_beast_buffer()
                 elif self.rawtype == 'avr':
                     messages = self.read_avr_buffer()
-
+                elif self.rawtype == 'dump1090':
+                    messages = self.read_dump1090_buffer()
+                    
                 if not messages:
                     continue
                 else:
@@ -193,6 +225,7 @@ if __name__ == '__main__':
     # for testing purpose only
     host = sys.argv[1]
     port = int(sys.argv[2])
-    client = BaseClient(host=host, port=port)
+    rawtype = sys.argv[3]
+    client = BaseClient(host=host, port=port, rawtype=rawtype)
     client.daemon = True
     client.run()
