@@ -49,7 +49,7 @@ class BaseClient(Thread):
         #Join all chars into temporary string
         tempbuf = "".join(map(chr,self.buffer))
 
-        #set flag if last character is not newline
+        #set flag if last character is newline
         complete = True if tempbuf[-1] == '\n' else False
         #split them by newline
         messages = tempbuf.split('\n')
