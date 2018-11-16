@@ -44,7 +44,8 @@ class BaseClient(Thread):
         complete = False
         ts = time.time()
 
-        #buffer is a series of char values - the 'string' given by socket
+        #buffer is a series of int values
+        #the byte object given by the socket gets implicitly converted to in when extended to buffer
         #Convert into a list of one char strings
         #Join all chars into temporary string
         tempbuf = "".join(map(chr,self.buffer))
