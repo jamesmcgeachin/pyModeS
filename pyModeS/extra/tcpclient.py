@@ -44,26 +44,35 @@ class BaseClient(Thread):
         complete = False
         ts = time.time()
 
-        #buffer is a series of int values
-        #the byte object given by the socket gets implicitly converted to in when extended to buffer
-        #Convert into a list of one char strings
-        #Join all chars into temporary string
-        tempbuf = "".join(map(chr,self.buffer))
+        try:
+            #Try to parse the buffer received
+            
+            #buffer is a series of int values
+            #the byte object given by the socket gets implicitly converted to in when extended to buffer
+            #Convert into a list of one char strings
+            #Join all chars into temporary string
+            tempbuf = "".join(map(chr,self.buffer))
 
-        #If nothing in tempbuf - return null message
-        if tempbuf == "":
-            return []
+            #If nothing in tempbuf - return null message
+            if tempbuf == "":
+                return []
 
-        #set flag if last character is newline
-        complete = True if tempbuf[-1] == '\n' else False
-        #split them by newline
-        messages = tempbuf.split('\n')
-                
-        #place residual back in buffer
-        if not complete:
-            self.buffer = list(messages[-1])
-        else:
-            self.buffer.clear()
+            #set flag if last character is newline
+            complete = True if tempbuf[-1] == '\n' else False
+            #split them by newline
+            messages = tempbuf.split('\n')
+
+            #place residual back in buffer
+            if not complete:
+                self.buffer = list(messages[-1])
+            else:
+                self.buffer.clear()
+            
+        except Exception as e:
+                print("Unexpected Error in dump1090 parse:", e)
+                print("Buffer to be parsed: {}".format(self.buffer))
+                self.buffer.clear()
+                pass
 
         #we're either deleting a partial message, or an empty string resulting from splitting newline
         del(messages[-1])
