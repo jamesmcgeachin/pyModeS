@@ -64,7 +64,8 @@ class BaseClient(Thread):
 
             #place residual back in buffer
             if not complete:
-                self.buffer = list(messages[-1])
+                #have to convert back to ints from chars
+                self.buffer = [ord(i) for i in messages[-1]]
             else:
                 self.buffer.clear()
             
@@ -72,7 +73,7 @@ class BaseClient(Thread):
                 print("Unexpected Error in dump1090 parse:", e)
                 print("Buffer to be parsed: {}".format(self.buffer))
                 self.buffer.clear()
-                pass
+                raise RuntimeError("Something bad happened") from e
 
         #we're either deleting a partial message, or an empty string resulting from splitting newline
         del(messages[-1])
