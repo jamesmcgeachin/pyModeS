@@ -49,6 +49,10 @@ class BaseClient(Thread):
         #Join all chars into temporary string
         tempbuf = "".join(map(chr,self.buffer))
 
+        #If nothing in tempbuf - return null message
+        if tempbuf == "":
+            return []
+
         #set flag if last character is newline
         complete = True if tempbuf[-1] == '\n' else False
         #split them by newline
@@ -58,12 +62,12 @@ class BaseClient(Thread):
         if not complete:
             self.buffer = list(messages[-1])
         else:
-            self.buffer = []
+            self.buffer.clear()
 
         #we're either deleting a partial message, or an empty string resulting from splitting newline
         del(messages[-1])
             
-        #process messages into messages list
+        #re-process messages into messages list.  Keeping message, ts alignment for compatibility
         messages = [[message[13:-1], ts] for message in messages]
         
         return messages
