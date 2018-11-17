@@ -28,7 +28,7 @@ class BaseClient(Thread):
         while True:
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(10)    # 10 second timeout
+                s.settimeout(30)    # Setting a longer timeout
                 s.connect((self.host, self.port))
                 print("Server connected - %s:%s" % (self.host, self.port))
                 print("collecting ADS-B messages...")
